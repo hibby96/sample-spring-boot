@@ -11,6 +11,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarCloud') {
                     sh './gradlew sonarqube'
+                    sleep(10)
                 }
             }
         }
@@ -34,8 +35,9 @@ pipeline {
                 }
             }
         }
-        stage('Rollout') {
+        stage('Deployment') {
             steps {
+                    sh 'kubectl apply -f kubernetes.yml'
                     sh 'kubectl rollout restart deployment/sample-spring-boot'
             }
         }
