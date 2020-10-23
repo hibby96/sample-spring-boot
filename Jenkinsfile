@@ -1,44 +1,14 @@
 pipeline {
-    agent none
+    agent any
     stages {
-        stage('build') {
-            agent {
-                docker { image 'gradle' }
-            }
+        stage('compile') {
             steps {
-                sh 'chmod +x gradlew && ./gradlew build'
+                gradlew('clean', 'classes')
             }
         }
-        stage('sonarqube') {
-            agent {
-                docker { image 'busybox' }
-            }
+        stage('Unit Tests') {
             steps {
-                sh 'echo sonarqube'
-            }
-        }
-        stage('docker build') {
-            agent {
-                docker { image 'busybox' }
-            }
-            steps {
-                sh 'echo docker build'
-            }
-        }
-        stage('docker push') {
-            agent {
-                docker { image 'busybox' }
-            }
-            steps {
-                sh 'echo docker push'
-            }
-        }
-        stage('app deploy') {
-            agent {
-                docker { image 'busybox' }
-            }
-            steps {
-                sh 'echo kube deploy'
+                gradlew('test')
             }
         }
     }
