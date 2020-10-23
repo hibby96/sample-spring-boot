@@ -23,6 +23,7 @@ pipeline {
         }
         stage('image build and push') {
             steps {
+                script {
                    docker.withTool('docker') {
                         repoId = "hippy96/interview"
                         image = docker.build(repoId)
@@ -32,6 +33,7 @@ pipeline {
                    }
                 }
             }
+        }
         stage('Rollout') {
             steps {
                     sh 'kubectl rollout restart deployment/sample-spring-boot'
