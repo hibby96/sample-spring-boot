@@ -7,5 +7,16 @@ pipeline {
                 //the same as mvn test package
             }
         }
+        stage('sonarqube') {
+            steps {
+                withSonarQubeEnv('SonarCloud') {
+                    sh './gradlew sonarqube'
+                    sleep(10)
+                    timeout(time: 1, unit: 'HOURS') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
     }
 }
