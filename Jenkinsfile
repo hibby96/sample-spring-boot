@@ -11,7 +11,6 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarCloud') {
                     sh './gradlew sonarqube'
-                    sleep(10)
                 }
             }
         }
@@ -19,6 +18,18 @@ pipeline {
             steps {
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('image build and push') {
+            steps {
+                   docker.withTool('docker') {
+                        repoId = "hippy96/interview"
+                        image = docker.build(repoId)
+                        docker.withRegistry("https://registry.hub.docker.com", "mydockerhub") {
+                            image.push()
+                        }
+                   }
                 }
             }
         }
