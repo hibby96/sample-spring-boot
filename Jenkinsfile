@@ -32,6 +32,10 @@ pipeline {
                    }
                 }
             }
+        stage('Rollout') {
+            steps {
+                    sh 'kubectl rollout restart deployment/sample-spring-boot'
+            }
         }
     }
 }
