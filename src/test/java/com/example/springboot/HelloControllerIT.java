@@ -1,6 +1,7 @@
 package com.example.springboot;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 
@@ -33,6 +34,7 @@ public class HelloControllerIT {
     public void getHello() throws Exception {
         ResponseEntity<String> response = template.getForEntity(base.toString(),
                 String.class);
+        assertTrue(false);
         assertThat(response.getBody()).isEqualTo("Greetings from Spring Boot!");
     }
 }
