@@ -1,44 +1,44 @@
 pipeline {
-    agent none
+    agent any
     stages {
         stage('build') {
-            agent {
-                docker { image 'gradle' }
-            }
             steps {
-                sh 'chmod +x gradlew && ./gradlew build'
+                sh 'chmod +x gradlew && ./gradlew clean build'
+                //the same as mvn clean test package
             }
         }
-        stage('sonarqube') {
-            agent {
-                docker { image 'busybox' }
-            }
+         stage('sonarqube') {
+             steps {
+                 withSonarQubeEnv('SonarCloud') {
+                     sh './gradlew sonarqube'
+                     sleep(10)
+                 }
+             }
+         }
+         stage('sonarqube gatekeeper') {
+             steps {
+                 timeout(time: 1, unit: 'HOURS') {
+                     waitForQualityGate abortPipeline: true
+                 }
+             }
+         }
+        stage('image build and push') {
             steps {
-                sh 'echo sonarqube'
+                script {
+                   docker.withTool('docker') {
+                        repoId = "hippy96/interview"
+                        image = docker.build(repoId)
+                        docker.withRegistry("https://registry.hub.docker.com", "mydockerhub") {
+                            image.push()
+                        }
+                   }
+                }
             }
         }
-        stage('docker build') {
-            agent {
-                docker { image 'busybox' }
-            }
+        stage('Deployment') {
             steps {
-                sh 'echo docker build'
-            }
-        }
-        stage('docker push') {
-            agent {
-                docker { image 'busybox' }
-            }
-            steps {
-                sh 'echo docker push'
-            }
-        }
-        stage('app deploy') {
-            agent {
-                docker { image 'busybox' }
-            }
-            steps {
-                sh 'echo kube deploy'
+                    sh 'kubectl apply -f kubernetes.yml'
+                    sh 'kubectl rollout restart deployment/sample-spring-boot'
             }
         }
     }
