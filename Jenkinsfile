@@ -41,9 +41,10 @@ pipeline {
                 docker { image 'docker' }
             }
             steps {
-                withDockerRegistry([credentialsId: 'creds-dockerhub', url: ''])
+                withDockerRegistry([credentialsId: 'creds-dockerhub', url: '']) {
                     sh 'docker push hippy96/cog:${currentBuild.number}'
                     sh 'docker push hippy96/cog:latest'
+                }
             }
         }
         stage('app deploy') {
