@@ -32,8 +32,8 @@ pipeline {
                 docker { image 'docker' }
             }
             steps {
-                sh 'docker build -t hippy96/cog:${currentBuild.number} .'
-                sh 'docker tag hippy96/cog:${currentBuild.number} hippy96/cog:latest'
+                sh "docker build -t hippy96/cog:${currentBuild.number} ."
+                sh "docker tag hippy96/cog:${currentBuild.number} hippy96/cog:latest"
             }
         }
         stage('docker push') {
@@ -42,7 +42,7 @@ pipeline {
             }
             steps {
                 withDockerRegistry([credentialsId: 'creds-dockerhub', url: '']) {
-                    sh 'docker push hippy96/cog:${currentBuild.number}'
+                    sh "docker push hippy96/cog:${currentBuild.number}"
                     sh 'docker push hippy96/cog:latest'
                 }
             }
