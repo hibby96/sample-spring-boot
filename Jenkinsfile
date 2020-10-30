@@ -11,34 +11,50 @@ pipeline {
         }
         stage('sonarqube') {
             agent {
-                docker { image 'busybox' }
+                docker { image 'gradle' }
             }
             steps {
-                sh 'echo sonarqube'
-            }
-        }
+                 withSonarQubeEnv('sonarcloud') {
+                     sh './gradlew sonarqube'
+                     sleep(10)
+                 }
+             }
+         }
+         stage('sonarqube gatekeeper') {
+             steps {
+                 timeout(time: 1, unit: 'HOURS') {
+                     waitForQualityGate abortPipeline: true
+                 }
+             }
+         }
         stage('docker build') {
             agent {
-                docker { image 'busybox' }
+                docker { image 'docker' }
             }
             steps {
-                sh 'echo docker build'
+                sh 'docker build -t hippy96/cog:${currentBuild.number} .'
+                sh 'docker tag hippy96/cog:${currentBuild.number} hippy96/cog:latest'
             }
         }
         stage('docker push') {
             agent {
-                docker { image 'busybox' }
+                docker { image 'docker' }
             }
             steps {
-                sh 'echo docker push'
+                withDockerRegistry([credentialsId: 'creds-dockerhub', url: ''])
+                    sh 'docker push hippy96/cog:${currentBuild.number}'
+                    sh 'docker push hippy96/cog:latest'
             }
         }
         stage('app deploy') {
             agent {
-                docker { image 'busybox' }
+                docker { image 'roffe/kubectl' }
             }
             steps {
-                sh 'echo kube deploy'
+                withKubeConfig([credentialsId: 'kube-creds', serverUrl: 'https://kubernetes.docker.internal:6443']) {
+                    sh 'kubectl apply -f kubernetes.yml'
+                    sh 'kubectl rollout restart deployment/sample-spring-boot'
+                }
             }
         }
     }
