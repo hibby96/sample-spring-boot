@@ -9,24 +9,24 @@ pipeline {
                 sh 'chmod +x gradlew && ./gradlew build'
             }
         }
-        stage('sonarqube') {
-            agent {
-                docker { image 'gradle' }
-            }
-            steps {
-                 withSonarQubeEnv('sonarcloud') {
-                     sh './gradlew sonarqube'
-                     sleep(10)
-                 }
-             }
-         }
-         stage('sonarqube gatekeeper') {
-             steps {
-                 timeout(time: 1, unit: 'HOURS') {
-                     waitForQualityGate abortPipeline: true
-                 }
-             }
-         }
+        // stage('sonarqube') {
+        //     agent {
+        //         docker { image 'gradle' }
+        //     }
+        //     steps {
+        //          withSonarQubeEnv('sonarcloud') {
+        //              sh './gradlew sonarqube'
+        //              sleep(10)
+        //          }
+        //      }
+        //  }
+        //  stage('sonarqube gatekeeper') {
+        //      steps {
+        //          timeout(time: 1, unit: 'HOURS') {
+        //              waitForQualityGate abortPipeline: false
+        //          }
+        //      }
+        //  }
         stage('docker build') {
             agent {
                 docker { image 'docker' }
