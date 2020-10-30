@@ -49,7 +49,7 @@ pipeline {
         }
         stage('app deploy') {
             agent {
-                docker { image 'roffe/kubectl' }
+                docker { image 'alxl/kubectl' }
             }
             steps {
                 withKubeConfig([credentialsId: 'kube-creds', serverUrl: 'https://kubernetes.docker.internal:6443']) {
